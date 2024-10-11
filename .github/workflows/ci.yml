@@ -2,6 +2,10 @@ name: Simple Check Run Example
 
 on: [push]
 
+permissions:
+  checks: write
+  statuses: write
+
 jobs:
   example-check:
     runs-on: ubuntu-latest
@@ -22,19 +26,18 @@ jobs:
               head_sha: context.sha,
               status: 'in_progress',
             });
-            return checkRun.data.id; // Return the check run ID
+            return checkRun.data.id;
 
       - name: Simulate Work
         run: |
-          # Simulating a task
-          sleep 2  # Simulate a task duration
-          echo "Task completed successfully!"  # Simulate success
+          sleep 2
+          echo "Task completed successfully!"
 
       - name: Update Check Run
         uses: actions/github-script@v6
         with:
           script: |
-            const conclusion = 'success'; // Set conclusion based on your task
+            const conclusion = 'success';
             const checkRunId = '${{ steps.create_check_run.outputs.result }}';
 
             await github.checks.update({
