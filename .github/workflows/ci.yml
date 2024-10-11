@@ -1,4 +1,4 @@
-name: Simple Check Run Example
+name: Ping Google Check Run Example
 
 on: [push]
 
@@ -7,53 +7,25 @@ permissions:
   statuses: write
 
 jobs:
-  example-check:
+  ping-check:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
       - name: Create Check Run
         id: create_check_run
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const checkRun = await github.checks.create({
-              owner,
-              repo,
-              name: 'Simple Check',
-              head_sha: context.sha,
-              status: 'in_progress',
-            });
-            return checkRun.data.id;
-
-      - name: Simulate Work
         run: |
-          sleep 2
-          echo "Task completed successfully!"
-
-      - name: Update Check Run
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const conclusion = 'success';
-            const checkRunId = '${{ steps.create_check_run.outputs.result }}';
-
-            await github.checks.update({
-              owner,
-              repo,
-              check_run_id: checkRunId,
-              conclusion,
-              output: {
-                title: 'Check Result',
-                summary: 'The task has been completed successfully.',
-              },
-            });
+          response=$(curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/check-runs \
+            -d '{
+              "name": "Ping Google",
+              "head_sha": "${{ github.sha }}",
+              "status": "in_progress"
+            }')
+          check_run_id=$(echo "$response" | jq -r .id)
+          echo "Check Run ID: $check_run_id"
+          echo "::set-output name=check_run_id::$check_run_id"
