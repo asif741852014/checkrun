@@ -46,7 +46,7 @@ jobs:
 
       - name: Update Check Run
         run: |
-          conclusion="${{ env.ping_status }}"
+          conclusion= failure
           check_run_id="${{ env.check_run_id }}"
           curl -X PATCH \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
