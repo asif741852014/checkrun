@@ -29,12 +29,10 @@ jobs:
           check_run_id=$(echo "$response" | jq -r .id)
           echo "Check Run ID: $check_run_id"
           echo "check_run_id=$check_run_id" >> $GITHUB_ENV
-
       - name: Ping Google
         id: ping_google
         run: |
-          # Simulate a failure by using an invalid URL or intentionally failing the command
-          response=$(curl --write-out "%{http_code}" --silent --output /dev/null --location http://invalid-url.example)
+          response=$(curl --write-out "%{http_code}" --silent --output /dev/null --location google1.com)
           if [ "$response" -eq 200 ]; then
             echo "Ping successful"
             echo "ping_status=success" >> $GITHUB_ENV
@@ -42,7 +40,6 @@ jobs:
             echo "Ping failed with response code $response"
             echo "ping_status=failure" >> $GITHUB_ENV
           fi
-
       - name: Update Check Run
         run: |
           conclusion="${{ env.ping_status }}"
